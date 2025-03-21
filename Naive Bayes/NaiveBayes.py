@@ -20,10 +20,8 @@ class NaiveBayes:
         negbrob = np.sum(X[y == -1], axis=0) / np.sum(y == -1)
         return posbrob, negbrob
     
-    def fit(self, X, y):
+    def log_likelihood(self, X):
         import numpy as np
-        self.y = y
-        self.X = X
         pos, neg = self.PY()
         posprob, negprob = self.PXY()
         log_pos = np.log(pos)
@@ -34,13 +32,13 @@ class NaiveBayes:
         predictions = np.where(log_ratio > 0, 1, -1)
         return predictions
     
+    def fit(self, X, y):
+        self.y = y
+        self.X = X
+        predictions = self.log_likelihood(X)
+        return predictions
+    
     def predict(self, X):
-        import numpy as np
-        pos, neg = self.PY()
-        log_likelihood_pos = X @ np.log(self.PXY()[0]) + (1 - X) @ np.log(1 - self.PXY()[0])
-        log_likelihood_neg = X @ np.log(self.PXY()[1]) + (1 - X) @ np.log(1 - self.PXY()[1])
-        log_likelihood_pos += np.log(pos)
-        log_likelihood_neg += np.log(neg)
-        predictions = np.where(log_likelihood_pos > log_likelihood_neg, 1, -1)
+        predictions = self.log_likelihood(X)
         return predictions
         
